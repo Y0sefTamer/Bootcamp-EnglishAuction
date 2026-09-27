@@ -7,7 +7,6 @@ interface IERC721 {
     function transfer(address recipient, uint256 amount) external returns (bool);
 }
 
-
 contract EnglishAuction {
     event Start();
     event Bid(address indexed bidder, uint256 amount);
@@ -25,4 +24,22 @@ contract EnglishAuction {
     address public highestBidder;
     uint256 public highestBid;
     mapping(address => uint256) public bids;
+
+    constructor(address _nft, uint256 _nftId, uint256 _startingBid) {
+        nft = IERC721(_nft);
+        nftId = _nftId;
+        seller = payable(msg.sender);
+        highestBid = _startingBid;
+    }
+
+    function start() external {
+        require(!started, "started");
+        require(msg.sender == seller, "not seller");
+
+        nft.transferFrom(msg.sender, address(this), nftId);
+        started = true;
+        endAt = block.timestamp + 7 days;
+
+        emit Start();
+    }
 }
