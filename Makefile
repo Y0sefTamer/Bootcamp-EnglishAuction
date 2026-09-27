@@ -37,4 +37,4 @@ ifeq ($(findstring --network sepolia,$(ARGS)),--network sepolia)
 endif
 
 deploy:
-	@forge script script/DeployEscrow.s.sol:DeployEscrow $(NETWORK_ARGS)
+	@forge script script/DeployEnglishAuction.s.sol:DeployEnglishAuction $(NETWORK_ARGS)
