@@ -61,8 +61,27 @@ contract EnglishAuction {
     function withdraw() external {
         uint256 bal = bids[msg.sender];
         bids[msg.sender] = 0;
-        payable(msg.sender).transfer(bal);
+        (bool success, ) = payable(msg.sender).call{value: bal}("");
+        require(success, "Failed to transfer funds");
 
         emit Withdraw(msg.sender, bal);
+    }
+
+    function end() external {
+        require(started, "not started");
+        require(block.timestamp >= endAt, "not ended");
+        require(!ended, "ended");
+
+        ended = true;
+        if (highestBidder != address(0)) {
+            nft.safeTransferFrom(address(this), highestBidder, nftId);
+            (bool success, ) = seller.call{value: highestBid}("");
+            require(success, "Failed to transfer funds");
+
+        } else {
+            nft.safeTransferFrom(address(this), seller, nftId);
+        }
+
+        emit End(highestBidder, highestBid);
     }
 }
