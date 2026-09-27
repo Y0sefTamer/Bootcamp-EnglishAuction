@@ -10,7 +10,7 @@ interface IERC721 {
 contract EnglishAuction {
     event Start();
     event Bid(address indexed bidder, uint256 amount);
-    event withdraw(address indexed bidder, uint256 amount);
+    event Withdraw(address indexed bidder, uint256 amount);
     event End(address winner, uint256 amount);
 
     IERC721 public nft;
@@ -41,5 +41,28 @@ contract EnglishAuction {
         endAt = block.timestamp + 7 days;
 
         emit Start();
+    }
+
+    function bid() external payable {
+        require(started, "not started");
+        require(block.timestamp < endAt, "ended");
+        require(msg.value > highestBid, "value < highest");
+
+        if (highestBidder != address(0)) {
+            bids[highestBidder] += highestBid;
+        }
+
+        highestBidder = msg.sender;
+        highestBid = msg.value;
+
+        emit Bid(msg.sender, msg.value);
+    }
+
+    function withdraw() external {
+        uint256 bal = bids[msg.sender];
+        bids[msg.sender] = 0;
+        payable(msg.sender).transfer(bal);
+
+        emit Withdraw(msg.sender, bal);
     }
 }
